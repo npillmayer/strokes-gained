@@ -1,4 +1,8 @@
+# MacOS meta files
 .DS_Store
+
+# Flask working directory
+instance/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block libraries %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+   <!-- Make sure you put this AFTER Leaflet's CSS -->
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+     integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+   crossorigin=""></script>
+  <script src="https://unpkg.com/esri-leaflet@2.3.3/dist/esri-leaflet.js"
+    integrity="sha512-cMQ5e58BDuu1pr9BQ/eGRn6HaR6Olh0ofcHFWe5XesdCITVuSBiBZZbhCijBe5ya238f/zMMRYIMIIg1jxv4sQ=="
+    crossorigin=""></script>
+{% endblock %}
+
+{% block header %}
+<h1 class="title is-2">{% block title %}Runde eingeben{% endblock %}</h3>
+<h3 class="subtitle is-4">Bitte erfasse deine Schläge</h3>
+{% endblock %}
+
+{% block content %}
+  <div class="columns is-vcentered">
+	<div class="column is-half">
+	  <p class="block">
+		Trage auf der Übersichtskarte (<a href="#mapinput">unten</a>) deine
+		<strong>Schläge für diese Runde</strong> ein.
+		Sobald du alle Schläge erfasst hast, kannst du noch deinen Gesamt-Score eintragen
+		(wird nicht automatisch ermittelt).
+		Erst mit einem Klick auf „<strong>Sichern</strong>“ werden alle eingetragenen Schläge
+		für eine spätere Auswertung gespeichert, zusammen mit dem Score.
+	  </p>
+	  <p class="block">
+		Die Eingabe der Schläge erfolgt ganz einfach durch Mausklick
+		(siehe <a onclick="help()">Kurzanleitung</a>).
+	  </p>
+	</div>
+	<div class="column">
+	  <div class="level">
+	  <div class="level-left">
+	  <div class="level-item">
+	  <div class="block">
+		Golfrunde am {{ round['day'] }} <br>
+		Platz: {{ coursemeta.name }}<br>
+		Tees: {{ round['tees'] }}
+	  </div>
+	  </div>
+	  </div>
+	  <div class="level-right">
+	  <div class="level-item">
+	  <form action="{{ url_for('golfround.delete', id=round['id']) }}" method="post">
+		<input class="button is-danger is-light" type="submit" value="Runde löschen"
+		  onclick="return confirm('Are you sure you want to delete this round?');">
+	  </form>
+	  </div>
+	  </div>
+	  </div>
+
+	  <form action="{{ url_for('golfround.update', id=round['id'])}}" method="post">
+		<input name="rid" id="rid" type="hidden" value="{{ round['id'] }}" required>
+		<input name="day" id="day" type="hidden" value="{{ round['day'] }}" required>
+		<input name="game" id="game" type="hidden" value="TO DO" required>
+		<div class="field">
+		  <label for="score" class="label">Score</label>
+		  <div class="control">
+		  <input name="score" id="score" type="number" class="input"
+			value="{{ request.form['score'] or round['score'] }}">
+		  </div>
+		</div>
+		<div class="field is-grouped">
+		  <div class="control">
+			<input type="submit" value="Sichern" class="button is-link"
+			  onclick="return saveGame();">
+		  </div>
+		  <div class="control">
+			<a class="button is-link is-light"
+				href="{{ url_for('golfround.list') }}"
+			  >Abbrechen</a>
+		  </div>
+		</div>
+	  </form>
+	</div>
+  </div>
+<hr>
+
+<div class="columns" id="mapinput">
+  <div class="column">
+	<div id="strokes">
+	  <div class="field">
+		<label for="holes" class="label">Ausgewählte Bahn</label>
+		<div class="control">
+		  <div class="select">
+			<select id="holes" v-on:change="selectHole" v-model="selectedHole">
+			  <option v-for="h in holesOnCourse" :selected="selectedHole===h"
+					  v-bind:value="h">[[ "Loch " + h ]]</option>
+			</select> 
+		  </div>
+		</div>
+	  </div>
+	  <br>
+
+	  <div class="field">
+		<label for="actions" class="label">Aktionen</label>
+		<div class="control" id="actions">
+		  <button v-on:click="holeOut" :disabled='lastShot.result == "H"'
+			  class="button">einlochen</button>
+		</div>
+	  </div>
+	  <div class="field">
+		<div class="control">
+		  <button v-on:click="undoShot" :disabled="!lastShot.result"
+			  class="button">zurücknehmen</button>
+		</div>
+	  </div>
+	  <div class="field">
+		<div class="control">
+		  <!--button v-on:click="dropBall" :disabled="notStarted() || finished()"-->
+		  <button v-on:click="dropBall"
+				  :disabled='!lastShot.result || lastShot.result == "H" || lastShot.lie == "D"'
+				  class="button">droppen</button>
+		</div>
+	  </div>
+	</div>
+  </div>
+  <div class="column is-three-quarters">
+	<div id="mapid"></div>
+  </div>
+</div>
+
+<div class="modal" id="help">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Wie gebe ich meine Runde ein?</p>
+      <button class="delete" aria-label="close" onclick="help()"></button>
+    </header>
+    <section class="modal-card-body">
+	  <img src="{{ url_for('static', filename='tutorial/leere-Bahn.png') }}"
+		style="height:200px; float:left; margin-right:15px">
+	  <img src="{{ url_for('static', filename='tutorial/Shot-Info.png') }}"
+		style="height:200px; float:right; margin-left:15px">
+	  <p class="block">Um einen Schlag zu registrieren, klickst du einfach an die Stelle,
+	  wo der Ball zur Ruhe kam. Ein blauer <strong>Marker</strong> zeigt den Schlag an.
+	  Ein Klick auf einen Marker zeigt dir Informationen zu einem Schlag.
+	  </p>
+	  <p class="block">
+	  Die Fahne steht standardmäßig in der Grünmitte, lässt sich aber
+	  <strong>verschieben</strong>,
+	  um sie entsprechend der tatsächlichen Fahnenposition zu positionieren.
+	  </p>
+	  <p class="block">Für Schläge rund ums Grün solltest du näher heran
+	  <strong>zoomen</strong>.  Zwei Kreislinien
+	  um die Fahne herum zeigen Abstände von&nbsp;1 bzw.&nbsp;3&nbsp;Meter
+	  von der Fahne an. Um den Ball <strong>einzulochen</strong>,
+	  klickst du auf den entsprechenden Button.</p>
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button" onclick="help()">Verstanden</button>
+    </footer>
+  </div>
+</div>
+
+<script>
+  var mycourse = {{ coursemeta|tojson|safe }}
+  var date_of_play = "{{ round['day'] }}"
+  var tees_to_play = "{{ round['tees'] }}"
+  console.log("date of play = " + date_of_play)
+
+  function help() {
+	var element = document.getElementById("help");
+	element.classList.toggle("is-active");
+	var map = document.getElementById("mapid");
+	if (map.style.display === "none") {
+	  map.style.display = "block";
+	} else {
+	  map.style.display = "none";
+	}
+  } 
+</script>
+
+<script src="{{ url_for('static', filename='maps.js') }}"></script>
+<script src="{{ url_for('static', filename='geojson-utils.js') }}"></script>
+<script> store.dispatch('init');
+</script>
+{% endblock %}

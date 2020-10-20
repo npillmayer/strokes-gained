@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1 class="title is-2">{% block title %}Anmelden{% endblock %}</h1>
+  <h3 class="subtitle is-4">Bitte melde dich an bevor du fortfährst</h3>
+{% endblock %}
+
+{% block content %}
+<div class="container is-max-desktop">
+  <form method="post" style="max-width: 500px;">
+	<div class="field">
+	  <label for="username">Kennung</label>
+	  <div class="control">
+		<input name="username" id="username" class="input"
+			placeholder="Meine Kennung" required>
+	  </div>
+	</div>
+	<div class="field">
+	  <label for="password">Passwort</label>
+	  <p class="control has-icons-left">
+		  <input type="password" name="password" id="password" class="input"
+		      placeholder="Mein Passwort" required>
+		  <span class="icon is-small is-left">
+			<i class="fas fa-lock"></i>
+		  </span>
+	  </p>
+	</div>
+	<div class="field is-grouped">
+	  <div class="control">
+		<input class="button is-primary" type="submit" value="Anmelden">
+	  </div>
+	  <div class="control">
+		<a class="button is-link is-light"
+			href="{{ url_for('golfround.list') }}">Abbrechen</a>
+	  </div>
+	</div>
+  </form>
+</div>
+{% endblock %}
+

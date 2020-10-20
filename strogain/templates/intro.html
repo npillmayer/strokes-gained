@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1 class="title is-2">{% block title %}Strokes Gained{% endblock %}</h1>
+  <h3 class="subtitle is-4">Messbarer Erfolg</h3>
+{% endblock %}
+
+{% block content %}
+{% if not g.user %}
+<div class="field is-grouped">
+  <div class="control">
+	<a class="button is-link"
+		href="{{ url_for('auth.login') }}">Anmelden</a>
+  </div>
+  <div class="control">
+	<a class="button is-link is-light"
+		href="{{ url_for('auth.register') }}">Registrieren</a>
+  </div>
+</div>
+{% else %}
+<div class="field">
+  <div class="control">
+	<a class="button is-link"
+		href="{{ url_for('golfround.list') }}">Los geht's</a>
+  </div>
+</div>
+{% endif %}
+
+<article>
+  <header class="title is-3">
+  </header>
+  <section>
+<div class="container is-fluid">
+  <img src="{{ url_for('static', filename='intro/Martin-Laird.png') }}"
+	   style="float:right; width:240px">
+  <p class="block">Am 11. Oktober 2020 gewann der Schotte Martin Laird nach langer
+  Durststrecke wieder ein PGA Turnier, die <i>Shriners Hospitals for Children Open</i>,
+  und nahm über 1 mio Dollar mit nach Hause. Nach eigener Aussage war sein Spiel nicht in
+  der besten Verfassung. Was hat er in dieser Woche besser gemacht, so dass es
+  für den ersten Sieg nach 7&nbsp;Jahren gereicht hat?</p>
+
+  <img src="{{ url_for('static', filename='intro/classic-Stats.png') }}"
+	   style="float:left; width:240px; margin-right:20px; margin-bottom:10px">
+  <p class="block">Ein Blick auf die „klassischen“ Statistiken verrät uns, dass Martin etwas
+  längere Drives geschlagen hat als sonst, aber weniger Fairways und weniger Grüns getroffen
+  hat.  Sein Durchschnitt von 30 Putts pro Runde während des Turniers klingt ebenfalls nicht
+  berauschend. Sind das die statistischen Werte eines Gewinners?</p>
+
+  <p class="block">Die klassischen Statistiken – Driving Distance, Driving Accuracy, 
+  Putts per Round, Greens in Regulation, usw. – waren über Jahrzehnte das einzige Hilfsmittel
+  um die Spielstärke von Golfern zu quantifizieren. Doch diese Metriken haben ihre Schwächen,
+  v.&#8201;a. die, dass sie nicht unabhängig voneinander funktionieren. Braucht Martin Laird so
+  viele Putts pro Runde, weil sein Putting nicht gut ist? Oder doch eher, weil sein Eisen-
+  und Wedge-Spiel eine zu große Streuung hat und er deshalb zwar auf den Grüns landet,
+  aber meistens zu weit weg von der Fahne? Was muss Martin am dringendsten trainieren:
+  Wedge-Schläge oder Distanz-Putts? Die klassischen Metriken geben darauf keine
+  zufriedenstellende Antwort.</p>
+
+  <p class="block">In den letzten Jahren hat sich – nicht nur auf der PGA Tour – eine
+  neue Metrik durchgesetzt, die aussagekräftiger ist und Schwächen im Spiel
+  punktgenau deutlich macht: die <strong>Strokes Gained (SG)</strong> Metrik.
+  Auf einen Nenner gebracht misst SG für jeden Golfschlag, wie gut oder
+  schlecht dieser im Vergleich zu denen aller anderen Spielern in der gleichen Situation war.
+  Wenn man dann SG für jeden einzelnen Schlag ausgerechnet hat, kann man diese Werte über viele
+  Golfrunden oder Turniere hinweg verfolgen und aggregieren.</p>
+
+  <img src="{{ url_for('static', filename='intro/Martin-SG.png') }}"
+	   style="float:right; width:240px; margin-left:20px; margin-bottom:10px; margin-top:10px">
+  <p class="block">
+  Ein Blick auf die Strokes-Gained-Statistik von Martin zeigt uns, was bei seinem
+  Turniersieg bei ihm besonders gut geklappt hat (Diagramm rechts, SG für den Finaltag). Die
+  leeren Kringel zeigen seine SG-Werte in der gesamten Saison&nbsp;2020. Die Skala am rechten
+  Rand zeigt durch die Null-Linie an, wo der Durchschnitt der PGA Tour Pros liegt. Martin
+  hat also normalerweise seine Stärken bei den Schlägen aufs Grün (<i>Approach</i>),
+  ist aber rund ums Grün und beim Putten eher schwacher Durchschnitt.
+
+  Anders am Turnier-Sonntag (blaue Punkte): sein langes Spiel war eher mäßig,
+  aber auf und um das Grün bot er eine Glanzleistung. Insbesondere seine Putts brachten ihm
+  einen Vorteil von <em>2&nbsp;Schlägen</em> genüber dem Feld ein. Die Maßeinheit von SG sind
+  nämlich tatsächlich Schläge: SG misst die Güte eines Golfschlags in (Bruchteilen von)
+  Schlägen, die der Spieler damit gegenüber den anderen gewinnt oder verliert. (<i>Strokes
+  Gained</i> trägt diesen Namen – „gewonnene Schläge“ – also zurecht.) Martins Putter
+  verschaffte ihm am Sonntag einen Vorteil von fast zwei Schlägen gegenüber dem Durchschnitt
+  seiner. Obwohl ihn sein Driver etwas im Stich ließ
+  (SG&nbsp;Tee&nbsp;= -0,85), konnte er an diesem Tag ein überdurchschnittlich gutes
+  kurzes Spiel aktivieren, das ihn über die Ziellinie brachte (im Stechen – etwas Glück
+  gehört schließlich auch dazu).</p>
+
+  <p class="block">Martin Lairds Metriken rufen wahrscheinlich kein großes Staunen hervor.
+  Schließlich gilt doch „<i>Drive for show, putt for dough</i>&#8201;“! Unser Pro drängt
+  uns ja ständig, das kurzes Spiel ausdauernder zu trainiern. Aber stimmt das wirklich
+  immer?
+  <img src="{{ url_for('static', filename='intro/Austin-SG.png') }}"
+	   style="float:right; width:240px; margin-left:20px; margin-bottom:10px; margin-top:10px">
+  Martins Konkurrent im Stechen war Austin Cook, der am Sonntag sogar eine noch bessere
+  Runde spielte. Sein Weg dahin sah jedoch gänzlich anders aus.
+  Austin puttete nur wenig besser als der Durchschnitt, doch seine Eisen hatte er im Griff.
+  Mit seinen Annäherungsschlägen lag er 2,5&nbsp;Schläge besser als das Feld, so dass ihm eine
+  durchschnittliche Putt-Leistung genügte. Seine Putts waren schlicht und einfach kürzer.
+  Obwohl Martin und Austin im Normalfall nahezu identische Stärken und Schwächen teilen
+  (siehe die Kringel in den SG-Diagrammen), spielten sie sich also am Sonntag auf völlig
+  unterschiedliche Art und Weise nach vorne. Martin kehrte seinen Schwäche an diesem Tag
+  in Stärken um, während Austin seine Stärken noch mehr ausspielen konnte als sonst.</p>
+
+  <p class="block">SG-Metriken werden nicht nur für die groben Kategorien erfasst, die in
+  den PGA-Diagrammen sichtbar sind. Beispielweise kann ein(e) Tour-Pro(ette) – oder deren
+  Trainer – ermitteln, ob er/sie eine Schwäche bei Putts unter 2&nbsp;Metern aufweist, ob die
+  Leistung mit langen Eisen aus dem Rough verbesserungswürdig ist, und dergleichen mehr.
+  Und was den Tour-Pros recht ist, sollte uns Amateuren billig sein.
+  Ausgestattet mit einer SG-Statistik sollten wir ein der Lage sein, viel zielgerichteter
+  mit unserem Pro zu planen, wo wir unsere knapp bemessenen Trainingsauswände am
+  besten einsetzen.
+  </p>
+
+  <p class="block" style="margin-bottom:15px"><em>Quelle für alle Bilder: PGA Tour</em>
+</div>
+  </section>
+</article>
+
+{% if not g.user %}
+<div class="field is-grouped">
+  <div class="control">
+	<a class="button is-link"
+		href="{{ url_for('auth.login') }}">Anmelden</a>
+  </div>
+  <div class="control">
+	<a class="button is-link is-light"
+		href="{{ url_for('auth.register') }}">Registrieren</a>
+  </div>
+</div>
+{% else %}
+<div class="field">
+  <div class="control">
+	<a class="button is-link"
+		href="{{ url_for('golfround.list') }}">Los geht's</a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+

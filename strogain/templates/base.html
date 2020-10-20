@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{% endblock %} - Strokes Gained</title>
+	<link rel="icon" type="image/vnd.microsoft.icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!--link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css"-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="{{ url_for('static', filename='vuex.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <script src="{{ url_for('static', filename='strogain.js') }}"></script>
+    {% block libraries %}{% endblock %}
+  </head>
+  <body>
+  <nav>
+    <h1>„Strokes Gained”-Statistiken</h1>
+    <ul>
+      {% if g.user %}
+        <li><span>{{ g.user['username'] }}</span>
+        <li><a href="{{ url_for('auth.logout') }}">Abmelden</a>
+      {% else %}
+        <li><a href="{{ url_for('auth.register') }}">Registrieren</a>
+        <li><a href="{{ url_for('auth.login') }}">Anmelden</a>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <article class="section">
+	<header>
+	  <div class="container mb-4">
+		<div class="block">
+			{% block header %}{% endblock %}
+		</div>
+	  </div>
+	</header>
+
+
+	<div class="container">
+
+    <!--div class="container">
+      <h1 class="title is-2">
+        Strokes Gained Statistics
+      </h1>
+    </div-->
+	{% with messages = get_flashed_messages(with_categories=true) %}
+	  {% if messages %}
+		{% for category, message in messages %}
+		<div class="notification is-light {{ category }}">
+		  <button class="delete"></button>{{ message }} </div>
+		{% endfor %}
+	  {% endif %}
+	{% endwith %}
+
+	{% block content %}{% endblock %}
+	</div>
+  </article>
+
+  <footer class="footer">
+	<div class="content has-text-centered">
+	  <p>&copy; 2020 Norbert Pillmayer –
+	powered by <strong>Flask</strong>, <strong>Vue</strong> and <strong>Bulma</strong>
+	  </p>
+	</div>
+  </footer>
+
+  </body>
+  <script>
+	// Set up a click listener for all flash notices to remove the notification after
+	// a click on the X-button.
+	document.addEventListener('DOMContentLoaded', () => {
+	  (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+		var $notification = $delete.parentNode;
+		$delete.addEventListener('click', () => {
+		  $notification.parentNode.removeChild($notification);
+		});
+	  });
+	});
+  </script>
+</html>

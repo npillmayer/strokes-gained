@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block libraries %}
+<!--script src="luxon.js"></script-->
+<script src="{{ url_for('static', filename='luxon.min.js') }}"></script>
+{% endblock %}
+
+{% block header %}
+	<h1 class="title is-2">Gespielte Golfrunden</h1>
+{% endblock %}
+
+{% block content %}
+{% if not g.user %}
+<p class="block">
+Bitte melde dich an. Falls du noch kein Benutzerkonto hast, registriere dich neu.
+</p>
+{% endif %}
+
+<div class="block">
+
+<form name="datefilter" action="{{ url_for('golfround.list')}}" method="post">
+  <div class="field is-horizontal" style="max-width:25em">
+	<div class="field-body">
+	  <div class="field" style="width:12em">
+		<label for="datefrom" class="label">von</label>
+		<div class="control">
+		  <input name="datefrom" id="datefrom" type="date" class="input"
+			onchange="date_changed('datefrom')"
+			value="{{ request.form['datefrom']|default(datefrom, true) }}">
+		</div>
+		<p class="help" id="datefromhelp">Anfangsdatum für Filterung</p>
+	  </div>
+	  <div class="field" style="width:12em">
+		<label for="dateto" class="label">bis</label>
+		<div class="control">
+		  <input name="dateto" id="dateto" type="date" class="input"
+			oninput="date_changed('dateto')"
+			value="{{ request.form['dateto']|default(dateto, true) }}">
+		</div>
+		<p class="help" id="datetohelp">Endedatum für Filterung</p>
+	  </div>
+	</div>
+  </div>
+
+  {% if g.user %}
+  <div class="field is-grouped">
+	<div class="control">
+	  <a class="button is-link is-light" href="{{ url_for('golfround.create') }}">Neue Runde</a>
+	</div>
+	<div class="control">
+	  <input type="submit" name="action" value="Statistik" class="button is-link">
+	</div>
+  </div>
+  {% endif %}
+</form>
+
+</div>
+
+<div class="block">
+
+<!--- Table of Golf Rounds --------------------------------------------- -->
+{% if rounds %}
+  <table class="table is-striped is-hoverable is-bordered">
+	<thead>
+	  <tr>
+		{% if not g.user %}
+		<th>Spieler</th>
+        {% endif %}
+		<th>Platz</th><th>Datum</th><th>Score</th><th>Bemerkung</th>
+        {% if g.user %}
+		  <th></th>
+        {% endif %}
+	  </tr>
+	</thead>
+	<tbody>
+	{% for round in rounds %}
+    <tr class="round">
+	  {% if not g.user %}
+	  <td>{{ round['player'] }}</td>
+	  {% endif %}
+      <td>{{ round['course'] }}</td>
+	  <td>{{ round['day'].strftime('%Y-%m-%d') }}</td>
+	  <td class="has-text-centered">{{ round['score'] or "–" }}</td>
+	  <td>{{ round['descr'] or "" }}</td>
+        {% if g.user and g.user['username'] == round['player'] %}
+	  <td>
+          <a class="button is-small"
+			href="{{ url_for('golfround.update', id=round['id']) }}">Details</a>
+		  <a class="button is-small"
+			href="{{ url_for('stats.statistics',
+				gamedate1=round['day'].strftime('%Y-%m-%d'),
+				gamedate2=round['day'].strftime('%Y-%m-%d'),
+				oneround=true
+			) }}"
+			>Statistik</a>
+      </td>
+        {% endif %}
+    </tr>
+  {% endfor %}
+	</tbody>
+  </table>
+{% else %}
+  <p>Keine Golfrunden für diesen Zeitraum</p>
+{% endif %}
+
+</div>
+
+<script>
+var DT = luxon.DateTime;
+
+function date_changed(which) {
+  console.log("value changed: ", which)
+  d = check_date(which)
+  if (!d) {
+	console.log("date is undefined")
+  } else {
+	console.log("TRIGGER RELOAD")
+	document.datefilter.submit()
+  }
+}
+
+var helpmsg = {
+  'datefrom': 'Anfangsdatum für Filterung',
+  'dateto':   'Endedatum für Filterung'
+}
+
+function check_date(which) {
+  v = document.getElementById(which);
+  console.log("new value = ", v.value)
+  empty = (v.value == "")
+  console.log("empty = ", empty)
+  d = DT.fromFormat(v.value, "yyyy-MM-dd")
+  dstr = d.toRFC2822()
+  h = document.getElementById(which + 'help')
+  if (!empty && (!dstr || !DT.isDateTime(d) || d.year < 2010 || d.year > 2040)) {
+	console.log("invalid date")
+	make_help(which + 'help', 'Ungültiges Datum', h, false)
+	return undefined
+  } else {
+	console.log("     date = ", dstr)
+	make_help(which + 'help', helpmsg[which], h, true)
+  }
+  return d
+}
+
+function make_help(id, txt, node, isok) {
+  help = document.createElement("p");
+  if (isok) {
+	help.className = "help"
+  } else {
+	help.className = "help is-danger"
+  }
+  help.setAttribute("id", id);
+  htxt = document.createTextNode(txt)
+  help.appendChild(htxt);
+  //console.log(h.parentNode.className)
+  //console.log(help.innerHtml)
+  node.parentNode.replaceChild(help, node)
+}
+</script>
+{% endblock %}

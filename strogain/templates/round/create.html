@@ -1,0 +1,52 @@
+
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1 class="title is-2">{% block title %}Neue Golfrunde{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form id="newround" method="post">
+	<div class="field">
+	  <label class="label">Platz</label>
+	  <div class="control"><p>Open.9 / Eicherloh</p></div>
+	</div>
+	<div class="field">
+	  <label for="day" class="label">Datum</label>
+	  <div class="control">
+		<input class="input datefield" style="max-width: 300px;"
+			name="day" id="day" type="date" value="{{ day }}" required>
+	  </div>
+	</div>
+	<div class="field">
+	  <label for="tees" class="label">Tees</label>
+	  <div class="control">
+		<div class="select">
+		  <select id="tees" name="tees" v-on:change="selectTees" v-model="selectedTees">
+			<option v-for="h in selectableTees.colors" :selected="selectedTees===h"
+					v-bind:value="h">[[ h ]]</option>
+		  </select> 
+		</div>
+	  </div>
+	</div>
+	<div class="field">
+	  <label for="description" class="label">Bemerkung</label>
+	  <div class="control">
+		<input class="input" name="descr" id="description"
+			  placeholder="Eine optionale Bemerkung zu dieser Runde">
+	  </div>
+	</div>
+	<div class="field is-grouped">
+	  <div class="control">
+		<input type="submit" value="Sichern" class="button is-primary">
+	  </div>
+	  <div class="control">
+		<a class="button is-link is-light"
+			href="{{ url_for('golfround.list') }}">Abbrechen</a>
+	  </div>
+	</div>
+  </form>
+
+  <script src="{{ url_for('static', filename='golfround.js') }}">
+  </script>
+{% endblock %}
