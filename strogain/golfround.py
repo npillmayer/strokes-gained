@@ -102,12 +102,12 @@ def create():
                     (g.user['username'], "Open.9", day, tees, descr)
                 )
                 db.commit()
-                return redirect(url_for('golfround.index'))
+                return redirect(url_for('golfround.list'))
             except Error as e:
                 print("An error occurred:", e.args[0])
                 flash("Fehler beim Anlegen der Runde in der Datenbank")
 
-            return redirect(url_for('golfround.index'))
+            return redirect(url_for('golfround.list'))
 
     return render_template('round/create.html', day=datetime.date.today())
 
@@ -168,5 +168,5 @@ def delete(id):
     db = get_db()
     db.execute('DELETE FROM round WHERE id = ?', (id,))
     db.commit()
-    return redirect(url_for('golfround.index'))
+    return redirect(url_for('golfround.list'))
 
